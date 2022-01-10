@@ -5,19 +5,22 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
+    public float speed;
+    private List<GameObject> monsterPrefabIns;
     private List<GameObject> terrainPrefabIns;
     private GameObject player;
-    delegate void keydown();
-    Dictionary<string, keydown> creator = new Dictionary<string, keydown>();
+
+    private Animator playerAnimator;
+    private Animation playerAnimation;
 
     private void Awake()
     {
-        terrainPrefabIns = LoadTerrain.LoadData();
-        player = LoadCharacter.LoadData();
-        FlowPlayer.playerPos = player.transform;
-        Controller();
+        Terrain();
+        //Mobs();
+        Player();
+        Camera();
+        
     }
-    // Start is called before the first frame update
     void Start()
     {
     }
@@ -25,55 +28,87 @@ public class Main : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (Input.anyKey)
-        //{
-        //    Debug.Log(Input.inputString);
-        //    creator[Input.inputString]();
-        //}
-        if (Input.GetKey(KeyCode.W))
+        AnimatorStateInfo stateinfo = playerAnimator.GetCurrentAnimatorStateInfo(0);
+        if (Input.GetKey(KeyCode.UpArrow))
         {
-            player.transform.position += player.transform.forward * Time.deltaTime;
+            playerAnimator.SetBool("isWalk", true);
+            player.transform.position += player.transform.forward * Time.deltaTime * speed;
         }
-        if (Input.GetKey(KeyCode.A))
+        else
         {
-
+            playerAnimator.SetBool("isWalk", false);
+        }
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            playerAnimator.SetBool("isWalkL", true);
             player.transform.Rotate(0, -100 * Time.deltaTime, 0);
-            player.transform.position += player.transform.forward * Time.deltaTime / 10;
+            player.transform.position += player.transform.forward * Time.deltaTime / 10 * speed;
 
         }
-        if (Input.GetKey(KeyCode.S))
+        else
         {
-            player.transform.position -= player.transform.forward * Time.deltaTime;
+            playerAnimator.SetBool("isWalkL", false);
         }
-        if (Input.GetKey(KeyCode.D))
-        {
 
+        if (Input.GetKey(KeyCode.DownArrow))
+        {
+            playerAnimator.SetBool("isWalkB", true);
+            player.transform.position -= player.transform.forward * Time.deltaTime * speed;
+        }
+        else
+        {
+            playerAnimator.SetBool("isWalkB", false);
+        }
+
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            playerAnimator.SetBool("isWalkR", true);
             player.transform.Rotate(0, 100 * Time.deltaTime, 0);
-            player.transform.position += player.transform.forward * Time.deltaTime / 10;
+            player.transform.position += player.transform.forward * Time.deltaTime / 10 * speed;
         }
+        else
+        {
+            playerAnimator.SetBool("isWalkR", false);
+        }
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //me.transform.position -= me.transform.forward * Time.deltaTime * KeySpace_weight;
-            player.transform.position += new Vector3(0, 1 , 0);
-            player.transform.position += player.transform.forward * Time.deltaTime ;
+            player.transform.position += new Vector3(0, 1, 0);
+            player.transform.position += player.transform.forward * Time.deltaTime;
         }
-
     }
 
-    void Controller()
+    void Mobs()
     {
-        creator[""] = () => { };
-        creator["w"] = () => player.transform.position += player.transform.forward * Time.deltaTime; ;
-        creator["s"] = () => player.transform.position -= player.transform.forward * Time.deltaTime;
-        creator["a"] = () => {
-                                player.transform.Rotate(0, -100 * Time.deltaTime, 0);
-                                player.transform.position += player.transform.forward * Time.deltaTime / 10;
-                             };
-        creator["d"] = () => {
-                                player.transform.Rotate(0, 100 * Time.deltaTime, 0);
-                                player.transform.position += player.transform.forward * Time.deltaTime / 10;
-                             };
-        creator["Space"] = () => player.transform.position -= player.transform.forward * Time.deltaTime;
+        monsterPrefabIns = LoadMonster.LoadData();
+        Mobsposition();
     }
+    void Mobsposition()
+    {
+        int count = 0;
+        for(int i=0; i< monsterPrefabIns.Count;i++)
+        {
+            monsterPrefabIns[i].transform.position = new Vector3(5.0f, 1.0f, 0.0f + count);
+            count+=8;
+        }
+    }
+    void Camera()
+    {
+        FlowPlayer.playerPos = player.transform;
+    }
+    void Player()
+    {
+        player = LoadCharacter.LoadData();
 
+        playerAnimator = player.GetComponent<Animator>();
+        
+        playerAnimation = player.GetComponent<Animation>();
+
+       
+
+    }
+    void Terrain()
+    {
+        terrainPrefabIns = LoadTerrain.LoadData();
+    }
 }
